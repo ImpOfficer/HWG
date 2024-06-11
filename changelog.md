@@ -1,3 +1,3 @@
-v.2.1.2
+v.2.2.0
 
-- Fixes laggy leg/arm movement.
+- Ported to 1.20.6
