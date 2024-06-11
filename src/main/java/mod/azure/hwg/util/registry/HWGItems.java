@@ -72,9 +72,9 @@ public record HWGItems() {
     }, "spistol");
     public static AzureAnimatedGunItem SNIPER = item(new AzureAnimatedGunItem("sniper_rifle", ProjectileEnum.BULLET, GunTypeEnum.SNIPER, HWGMod.config.gunconfigs.sniperconfigs.sniper_cap, HWGSounds.SNIPERRELOAD, HWGSounds.SNIPER) {
     }, "sniper_rifle");
-    public static AzureAnimatedGunItem MEANIE1 = item(new AzureAnimatedGunItem("meanie_gun_1", ProjectileEnum.MEANIE, GunTypeEnum.MEANIE, HWGMod.config.gunconfigs.meanieconfigs.meanie_cap, HWGSounds.PISTOLRELOAD, SoundEvents.ARMOR_EQUIP_IRON) {
+    public static AzureAnimatedGunItem MEANIE1 = item(new AzureAnimatedGunItem("meanie_gun_1", ProjectileEnum.MEANIE, GunTypeEnum.MEANIE, HWGMod.config.gunconfigs.meanieconfigs.meanie_cap, HWGSounds.PISTOLRELOAD, SoundEvents.ARMOR_EQUIP_IRON.value()) {
     }, "meanie_gun_1");
-    public static AzureAnimatedGunItem MEANIE2 = item(new AzureAnimatedGunItem("meanie_gun_2", ProjectileEnum.MEANIE, GunTypeEnum.MEANIE, HWGMod.config.gunconfigs.meanieconfigs.meanie_cap, HWGSounds.PISTOLRELOAD, SoundEvents.ARMOR_EQUIP_IRON) {
+    public static AzureAnimatedGunItem MEANIE2 = item(new AzureAnimatedGunItem("meanie_gun_2", ProjectileEnum.MEANIE, GunTypeEnum.MEANIE, HWGMod.config.gunconfigs.meanieconfigs.meanie_cap, HWGSounds.PISTOLRELOAD, SoundEvents.ARMOR_EQUIP_IRON.value()) {
     }, "meanie_gun_2");
     public static AzureAnimatedGunItem GOLDEN_GUN = item(new AzureAnimatedGunItem("golden_gun", ProjectileEnum.BULLET, GunTypeEnum.GOLDEN_PISTOL, HWGMod.config.gunconfigs.gpistolconfigs.golden_pistol_cap, HWGSounds.PISTOLRELOAD, HWGSounds.PISTOL) {
     }, "golden_gun");

@@ -2,11 +2,9 @@ package mod.azure.hwg.util.registry;
 
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.entity.projectiles.*;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
@@ -35,7 +33,7 @@ public record HWGProjectiles() {
 
     private static <T extends Entity> EntityType<T> projectile(EntityType.EntityFactory<T> factory, String id, boolean itemRender) {
 
-        EntityType<T> type = FabricEntityTypeBuilder.create(MobCategory.MISC, factory).dimensions(new EntityDimensions(0.5F, 0.5F, true)).disableSummon().spawnableFarFromPlayer().trackRangeBlocks(90).trackedUpdateRate(1).build();
+        EntityType<T> type = EntityType.Builder.of(factory, MobCategory.MISC).sized(0.5F, 0.5F).noSummon().canSpawnFarFromPlayer().clientTrackingRange(90).updateInterval(1).build();
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE, HWGMod.modResource(id), type);
 
@@ -53,7 +51,7 @@ public record HWGProjectiles() {
 
     private static <T extends Entity> EntityType<T> projectile1(EntityType.EntityFactory<T> factory, String id, boolean itemRender) {
 
-        EntityType<T> type = FabricEntityTypeBuilder.create(MobCategory.MISC, factory).dimensions(new EntityDimensions(1.5F, 1.5F, false)).disableSummon().spawnableFarFromPlayer().fireImmune().trackRangeBlocks(90).trackedUpdateRate(40).build();
+        EntityType<T> type = EntityType.Builder.of(factory, MobCategory.MISC).sized(1.5F, 1.5F).noSummon().fireImmune().canSpawnFarFromPlayer().clientTrackingRange(90).updateInterval(1).build();
 
         Registry.register(BuiltInRegistries.ENTITY_TYPE, HWGMod.modResource(id), type);
 

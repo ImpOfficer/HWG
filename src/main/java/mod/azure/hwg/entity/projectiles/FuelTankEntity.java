@@ -7,6 +7,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
@@ -16,6 +17,10 @@ public class FuelTankEntity extends Entity {
 
     public FuelTankEntity(EntityType<?> entityTypeIn, Level worldIn) {
         super(entityTypeIn, worldIn);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
     }
 
     public FuelTankEntity(Level worldIn, double x, double y, double z) {
@@ -30,10 +35,6 @@ public class FuelTankEntity extends Entity {
 
     protected void explode() {
         this.level().explode(this, this.getX(), this.getY(0.0625D), this.getZ(), 4.0F, true, Level.ExplosionInteraction.NONE);
-    }
-
-    @Override
-    protected void defineSynchedData() {
     }
 
     @Override

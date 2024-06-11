@@ -27,7 +27,7 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu {
     private void updateRuinedRepair(CallbackInfo ci) {
         var leftStack = this.inputSlots.getItem(0).copy();
         var rightStack = this.inputSlots.getItem(1).copy();
-        if ((leftStack.getItem() instanceof AzureAnimatedGunItem || leftStack.getItem() instanceof HWGGunLoadedBase) && EnchantmentHelper.getEnchantments(rightStack).containsKey(Enchantments.MENDING)) {
+        if ((leftStack.getItem() instanceof AzureAnimatedGunItem || leftStack.getItem() instanceof HWGGunLoadedBase) && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, rightStack) > 0) {
             var repaired = ItemStack.EMPTY;
             this.resultSlots.setItem(0, repaired);
             this.broadcastChanges();

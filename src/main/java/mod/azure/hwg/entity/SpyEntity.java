@@ -1,17 +1,18 @@
 package mod.azure.hwg.entity;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import mod.azure.azurelib.common.internal.common.core.animation.AnimatableManager;
-import mod.azure.azurelib.common.internal.common.core.animation.Animation;
-import mod.azure.azurelib.common.internal.common.core.animation.AnimationController;
-import mod.azure.azurelib.common.internal.common.core.animation.RawAnimation;
-import mod.azure.azurelib.common.internal.common.core.object.PlayState;
+import mod.azure.azurelib.core.animation.AnimatableManager;
+import mod.azure.azurelib.core.animation.Animation;
+import mod.azure.azurelib.core.animation.AnimationController;
+import mod.azure.azurelib.core.animation.RawAnimation;
+import mod.azure.azurelib.core.object.PlayState;
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.entity.tasks.HWGMeleeAttackTask;
 import mod.azure.hwg.entity.tasks.RangedShootingAttack;
 import mod.azure.hwg.util.registry.HWGItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -50,9 +51,11 @@ import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyPlayersSensor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class SpyEntity extends HWGEntity implements SmartBrainOwner<SpyEntity> {
 
@@ -79,7 +82,8 @@ public class SpyEntity extends HWGEntity implements SmartBrainOwner<SpyEntity> {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<>(this, "livingController", 0, event -> event.setAndContinue(RawAnimation.begin().thenLoop("idle"))));
+        controllers.add(new AnimationController<>(this, "livingController", 0, event -> event.setAndContinue(
+                RawAnimation.begin().thenLoop("idle"))));
         controllers.add(new AnimationController<>(this, "attackController", 0, event -> PlayState.STOP).triggerableAnim("ranged", RawAnimation.begin().then("attacking", Animation.LoopType.LOOP)).triggerableAnim("melee", RawAnimation.begin().then("melee", Animation.LoopType.PLAY_ONCE)).triggerableAnim("idle", RawAnimation.begin().thenWait(5).then("idle", Animation.LoopType.LOOP)));
     }
 
@@ -119,9 +123,9 @@ public class SpyEntity extends HWGEntity implements SmartBrainOwner<SpyEntity> {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(VARIANT, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
     }
 
     @Override
@@ -144,16 +148,12 @@ public class SpyEntity extends HWGEntity implements SmartBrainOwner<SpyEntity> {
         entityData.set(VARIANT, variant);
     }
 
+    @Nullable
     @Override
-    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return 1.85F;
-    }
-
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, SpawnGroupData entityData, CompoundTag entityTag) {
-        setItemSlot(EquipmentSlot.MAINHAND, makeInitialWeapon());
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
         setVariant(generateVariants(getRandom()));
-        return super.finalizeSpawn(world, difficulty, spawnReason, entityData, entityTag);
+        setItemSlot(EquipmentSlot.MAINHAND, makeInitialWeapon());
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     private ItemStack makeInitialWeapon() {
@@ -181,11 +181,6 @@ public class SpyEntity extends HWGEntity implements SmartBrainOwner<SpyEntity> {
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
         return SoundEvents.PILLAGER_HURT;
-    }
-
-    @Override
-    public @NotNull MobType getMobType() {
-        return MobType.ILLAGER;
     }
 
 }

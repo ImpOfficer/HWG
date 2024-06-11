@@ -14,6 +14,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
@@ -66,7 +67,7 @@ public class SBulletEntity extends BulletEntity {
                     if (!this.level().isClientSide && entity2 instanceof LivingEntity livingEntity1) {
                         EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
                         EnchantmentHelper.doPostDamageEffects(livingEntity1, livingEntity);
-                        if (this.isOnFire()) livingEntity.setSecondsOnFire(50);
+                        if (this.isOnFire()) livingEntity.setRemainingFireTicks(50);
                     }
 
                     this.doPostHurtEffects(livingEntity);
@@ -80,7 +81,7 @@ public class SBulletEntity extends BulletEntity {
                     if (!this.level().isClientSide && entity2 instanceof LivingEntity livingEntity1) {
                         EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
                         EnchantmentHelper.doPostDamageEffects(livingEntity1, livingEntity);
-                        if (this.isOnFire()) livingEntity.setSecondsOnFire(50);
+                        if (this.isOnFire()) livingEntity.setRemainingFireTicks(50);
                     }
                     this.doPostHurtEffects(livingEntity);
                     if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer && !this.isSilent())

@@ -26,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -50,30 +51,9 @@ public class ShellEntity extends AbstractArrow {
         super(HWGProjectiles.SHELL, owner, world, new ItemStack(HWGItems.SHOTGUN_SHELL));
     }
 
-    protected ShellEntity(EntityType<? extends ShellEntity> type, double x, double y, double z, Level world) {
-        this(type, world);
-    }
-
-    protected ShellEntity(EntityType<? extends ShellEntity> type, LivingEntity owner, Level world) {
-        this(type, owner.getX(), owner.getEyeY() - 0.10000000149011612D, owner.getZ(), world);
-        this.setOwner(owner);
-        if (owner instanceof Player) this.pickup = AbstractArrow.Pickup.ALLOWED;
-    }
-
-    public ShellEntity(Level world, double x, double y, double z) {
-        super(HWGProjectiles.SHELL, x, y, z, world, new ItemStack(HWGItems.SHOTGUN_SHELL));
-        this.setNoGravity(true);
-        this.setBaseDamage(0);
-    }
-
     @Override
     public void tickDespawn() {
         if (this.tickCount >= 40) this.remove(Entity.RemovalReason.DISCARDED);
-    }
-
-    @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) EntityPacket.createPacket(this);
     }
 
     @Override
@@ -85,20 +65,20 @@ public class ShellEntity extends AbstractArrow {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().define(FORCED_YAW, 0f);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FORCED_YAW, 0f);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+        tag.putShort("life", (short)this.tickCount);
         tag.putFloat("ForcedYaw", entityData.get(FORCED_YAW));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+        this.tickCount = tag.getShort("life");
         entityData.set(FORCED_YAW, tag.getFloat("ForcedYaw"));
     }
 
@@ -112,7 +92,7 @@ public class ShellEntity extends AbstractArrow {
             double f2 = this.getZ() + (this.random.nextDouble()) * this.getBbWidth() * 0.5D;
             this.level().addParticle(ParticleTypes.SMOKE, true, d2, this.getY(0.5), f2, 0, 0, 0);
         }
-        if (getOwner() instanceof Player owner) setYRot(entityData.get(FORCED_YAW));
+        if (getOwner() instanceof Player) setYRot(entityData.get(FORCED_YAW));
     }
 
     @Override
@@ -126,8 +106,8 @@ public class ShellEntity extends AbstractArrow {
     }
 
     @Override
-    protected SoundEvent getDefaultHitGroundSoundEvent() {
-        return SoundEvents.ARMOR_EQUIP_IRON;
+    protected @NotNull SoundEvent getDefaultHitGroundSoundEvent() {
+        return SoundEvents.ARMOR_EQUIP_IRON.value();
     }
 
     @Override
@@ -138,7 +118,7 @@ public class ShellEntity extends AbstractArrow {
             level().destroyBlock(blockHitResult.getBlockPos(), true);
         if (level().getBlockState(blockHitResult.getBlockPos()).getBlock().defaultBlockState().is(Blocks.GLASS_PANE) || level().getBlockState(blockHitResult.getBlockPos()).getBlock() instanceof StainedGlassPaneBlock)
             level().destroyBlock(blockHitResult.getBlockPos(), true);
-        this.setSoundEvent(SoundEvents.ARMOR_EQUIP_IRON);
+        this.setSoundEvent(SoundEvents.ARMOR_EQUIP_IRON.value());
     }
 
     @Override
@@ -159,27 +139,23 @@ public class ShellEntity extends AbstractArrow {
                 if (!this.level().isClientSide && entity2 instanceof LivingEntity livingEntity2) {
                     EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
                     EnchantmentHelper.doPostDamageEffects(livingEntity2, livingEntity);
-                    if (this.isOnFire()) livingEntity.setSecondsOnFire(50);
+                    if (this.isOnFire()) livingEntity.setRemainingFireTicks(50);
                 }
                 this.doPostHurtEffects(livingEntity);
-                if (entity2 != null && livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer serverPlayer && !this.isSilent())
+                if (livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer serverPlayer && !this.isSilent())
                     serverPlayer.connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.ARROW_HIT_PLAYER, 0.0F));
             }
         } else if (!this.level().isClientSide) this.remove(Entity.RemovalReason.DISCARDED);
     }
 
     @Override
-    @Environment(EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double distance) {
         return true;
     }
 
-    public void setProperties(float pitch, float yaw, float roll, float modifierZ) {
-        var f = 0.017453292F;
-        var x = -Mth.sin(yaw * f) * Mth.cos(pitch * f);
-        var y = -Mth.sin((pitch + roll) * f);
-        var z = Mth.cos(yaw * f) * Mth.cos(pitch * f);
-        this.shoot(x, y, z, modifierZ, 0);
+    @Override
+    protected @NotNull ItemStack getDefaultPickupItem() {
+        return Items.AIR.getDefaultInstance();
     }
 
 }

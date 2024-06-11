@@ -20,7 +20,7 @@
         }
     },
     "result": {
-        "item": "hwg:gun_table",
+        "id": "hwg:gun_table",
         "count": 1
     }
 }

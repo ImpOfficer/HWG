@@ -10,6 +10,7 @@ import mod.azure.hwg.util.MobAttributes;
 import mod.azure.hwg.util.MobSpawn;
 import mod.azure.hwg.util.recipes.GunTableRecipe;
 import mod.azure.hwg.util.registry.*;
+import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
@@ -31,16 +32,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.storage.loot.LootPool;
-import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 
 import java.util.List;
 
 public class HWGMod implements ModInitializer {
-    /**
-     * TODO: Fix Lesser Demons weapon rendering being too high
-     */
+
     public static HWGConfig config;
     public static final String MODID = "hwg";
     protected final RandomSource random = RandomSource.create();
@@ -136,13 +132,16 @@ public class HWGMod implements ModInitializer {
         GunSmithProfession.init();
         MobSpawn.addSpawnEntries();
         MobAttributes.init();
-        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, supplier, setter) -> {
-            if (HWGMod.chestResource(chests.get(this.random.nextInt(chests.size()))).equals(id))
-                supplier.pool(LootPool.lootPool().setRolls(ConstantValue.exactly(1)).with(LootItem.lootTableItem(HWGItems.MEANIE1).build()).with(LootItem.lootTableItem(HWGItems.MEANIE2).build()).build());
-        });
+//        LootTableEvents.MODIFY.register((resourceManager, lootManager, id, supplier, setter) -> {
+//            if (HWGMod.chestResource(chests.get(this.random.nextInt(chests.size()))).equals(id))
+//                supplier.pool(LootPool.lootPool().setRolls(ConstantValue.exactly(1))
+//                        .with(LootItem.lootTableItem(HWGItems.MEANIE1).build())
+//                        .with(LootItem.lootTableItem(HWGItems.MEANIE2).build())
+//                        .build());
+//        });
         SCREEN_HANDLER_TYPE = new MenuType<>(GunTableScreenHandler::new, FeatureFlags.VANILLA_SET);
         Registry.register(BuiltInRegistries.MENU, HWGMod.modResource("guntable_screen_type"), SCREEN_HANDLER_TYPE);
-        PacketHandler.registerMessages();
+        new PacketHandler().registerMessages();
         if (FabricLoader.getInstance().isModLoaded("gigeresque"))
             FabricLoader.getInstance().getModContainer(HWGMod.MODID).ifPresent((modContainer -> ResourceManagerHelper.registerBuiltinResourcePack(
                     // Mod Compat datapack found in resources/resourcepacks
@@ -153,11 +152,11 @@ public class HWGMod implements ModInitializer {
                     HWGMod.modResource("bewitchmentcompat"), modContainer, Component.literal("bewitchmentcompat"), ResourcePackActivationType.DEFAULT_ENABLED)));
     }
 
-    public static final ResourceLocation chestResource(String name) {
+    public static ResourceLocation chestResource(String name) {
         return new ResourceLocation("minecraft", "chests/" + name);
     }
 
-    public static final ResourceLocation modResource(String name) {
+    public static ResourceLocation modResource(String name) {
         return new ResourceLocation(MODID, name);
     }
 }

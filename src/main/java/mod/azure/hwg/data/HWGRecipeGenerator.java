@@ -6,7 +6,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 
 public class HWGRecipeGenerator extends FabricRecipeProvider implements HWGRecipeHelper {
 	public HWGRecipeGenerator(FabricDataOutput output) {
-		super(output);
+		super(output, null);
 	}
 
 	@Override

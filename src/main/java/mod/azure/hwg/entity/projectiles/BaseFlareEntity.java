@@ -1,17 +1,13 @@
 package mod.azure.hwg.entity.projectiles;
 
-import mod.azure.azurelib.common.internal.common.network.packet.EntityPacket;
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.util.Helper;
+import mod.azure.hwg.util.registry.HWGItems;
 import mod.azure.hwg.util.registry.HWGParticles;
 import mod.azure.hwg.util.registry.HWGProjectiles;
 import mod.azure.hwg.util.registry.HWGSounds;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -24,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import org.jetbrains.annotations.NotNull;
@@ -36,20 +33,24 @@ public class BaseFlareEntity extends AbstractArrow {
 
     public BaseFlareEntity(EntityType<? extends AbstractArrow> entityType, Level world) {
         super(HWGProjectiles.FLARE, world, ItemStack.EMPTY);
+        this.pickup = AbstractArrow.Pickup.DISALLOWED;
     }
 
     public BaseFlareEntity(Level world, double x, double y, double z) {
         super(HWGProjectiles.FLARE, world, ItemStack.EMPTY);
         this.absMoveTo(x, y, z);
+        this.pickup = AbstractArrow.Pickup.DISALLOWED;
     }
 
     public BaseFlareEntity(Level world, double x, double y, double z, boolean shotAtAngle) {
         this(world, x, y, z);
+        this.pickup = AbstractArrow.Pickup.DISALLOWED;
     }
 
     public BaseFlareEntity(Level world, Entity entity, double x, double y, double z, boolean shotAtAngle) {
         this(world, x, y, z, shotAtAngle);
         this.setOwner(entity);
+        this.pickup = AbstractArrow.Pickup.DISALLOWED;
     }
 
     @Override
@@ -62,21 +63,21 @@ public class BaseFlareEntity extends AbstractArrow {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.entityData.define(COLOR, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(COLOR, 0);
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
-        tag.putInt("Variant", this.getColor());
+    public void addAdditionalSaveData(CompoundTag compound) {
+        compound.putShort("life", (short)this.tickCount);
+        compound.putInt("Variant", this.getColor());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
-        this.setColor(tag.getInt("Variant"));
+    public void readAdditionalSaveData(CompoundTag compound) {
+        this.tickCount = compound.getShort("life");
+        this.setColor(compound.getInt("Variant"));
     }
 
     public int getColor() {
@@ -94,7 +95,7 @@ public class BaseFlareEntity extends AbstractArrow {
             idleTicks++;
         else
             idleTicks = 0;
-        if (idleOpt <= 0 || idleTicks < idleOpt)
+        if (idleTicks < idleOpt)
             super.tick();
         if (this.tickCount >= 800 || this.isInWater())
             this.remove(Entity.RemovalReason.DISCARDED);
@@ -147,7 +148,7 @@ public class BaseFlareEntity extends AbstractArrow {
     }
 
     @Override
-    protected SoundEvent getDefaultHitGroundSoundEvent() {
+    protected @NotNull SoundEvent getDefaultHitGroundSoundEvent() {
         return HWGSounds.FLAREGUN;
     }
 
@@ -165,12 +166,6 @@ public class BaseFlareEntity extends AbstractArrow {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) EntityPacket.createPacket(this);
-    }
-
-    @Override
-    @Environment(EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double distance) {
         return true;
     }
@@ -178,5 +173,10 @@ public class BaseFlareEntity extends AbstractArrow {
     @Override
     protected boolean tryPickup(Player player) {
         return false;
+    }
+
+    @Override
+    protected @NotNull ItemStack getDefaultPickupItem() {
+        return new ItemStack(HWGItems.WHITE_FLARE);
     }
 }

@@ -2,20 +2,23 @@ package mod.azure.hwg.util.recipes;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.client.gui.GunTableInventory;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.List;
 
 public record GunTableRecipe(List<Pair<Ingredient, Integer>> ingredients, ItemStack output) implements Recipe<GunTableInventory>, Comparable<GunTableRecipe> {
@@ -33,6 +36,11 @@ public record GunTableRecipe(List<Pair<Ingredient, Integer>> ingredients, ItemSt
         return true;
     }
 
+    @Override
+    public @NotNull ItemStack assemble(GunTableInventory craftingContainer, HolderLookup.Provider registries) {
+        return this.getResultItem(registries).copy();
+    }
+
     public Ingredient getIngredientForSlot(int index) {
         return ingredients.get(index).getFirst();
     }
@@ -42,27 +50,22 @@ public record GunTableRecipe(List<Pair<Ingredient, Integer>> ingredients, ItemSt
     }
 
     @Override
-    public ItemStack assemble(GunTableInventory inv, RegistryAccess var2) {
-        return this.getResultItem(var2).copy();
-    }
-
-    @Override
     public boolean canCraftInDimensions(int width, int height) {
         return true;
     }
 
     @Override
-    public ItemStack getResultItem(RegistryAccess var1) {
+    public @NotNull ItemStack getResultItem(HolderLookup.Provider registries) {
         return output;
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public @NotNull RecipeSerializer<?> getSerializer() {
         return HWGMod.GUN_TABLE_RECIPE_SERIALIZER;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public @NotNull RecipeType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -87,33 +90,37 @@ public record GunTableRecipe(List<Pair<Ingredient, Integer>> ingredients, ItemSt
         private Serializer() {
         }
 
-        public static final Codec<GunTableRecipe> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-                Codec.list(Codec.mapPair(Ingredient.CODEC_NONEMPTY.fieldOf("ingredient"), Codec.INT.fieldOf("count")).codec()).fieldOf("ingredients").forGetter(i -> i.ingredients),
-                ItemStack.RESULT_CODEC.codec().fieldOf("result").forGetter(i -> i.output)
+        public static final MapCodec<GunTableRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                Codec.list(
+                        Codec.mapPair(Ingredient.CODEC_NONEMPTY.fieldOf("ingredient"),
+                        Codec.INT.fieldOf("count")).codec()).fieldOf("ingredients").forGetter(i -> i.ingredients),
+                ItemStack.CODEC.fieldOf("result").forGetter(i -> i.output)
         ).apply(inst, GunTableRecipe::new));
+        public static final StreamCodec<RegistryFriendlyByteBuf, GunTableRecipe> STREAM_CODEC = StreamCodec.of(
+                GunTableRecipe.Serializer::toNetwork, GunTableRecipe.Serializer::fromNetwork);
 
         @Override
-        public Codec<GunTableRecipe> codec() {
-            return CODEC;
+        public @NotNull MapCodec<GunTableRecipe> codec() {
+            return MAP_CODEC;
         }
 
         @Override
-        public GunTableRecipe fromNetwork(FriendlyByteBuf packetByteBuf) {
-            List<Pair<Ingredient, Integer>> list = packetByteBuf.readList(buf -> Pair.of(Ingredient.fromNetwork(buf), buf.readInt()));
+        public @NotNull StreamCodec<RegistryFriendlyByteBuf, GunTableRecipe> streamCodec() {
+            return STREAM_CODEC;
+        }
 
-            ItemStack output = packetByteBuf.readItem();
-
+        private static GunTableRecipe fromNetwork(RegistryFriendlyByteBuf buffer) {
+            List<Pair<Ingredient, Integer>> list = buffer.readList(buf -> Pair.of(Ingredient.CONTENTS_STREAM_CODEC.decode(buffer), buffer.readInt()));
+            ItemStack output = ItemStack.STREAM_CODEC.decode(buffer);
             return new GunTableRecipe(list, output);
         }
 
-        @Override
-        public void toNetwork(FriendlyByteBuf packetByteBuf, GunTableRecipe gunTableRecipe) {
-            packetByteBuf.writeCollection(gunTableRecipe.ingredients, (buf, pair) -> {
-                pair.getFirst().toNetwork(buf);
+        private static void toNetwork(RegistryFriendlyByteBuf buffer, GunTableRecipe recipe) {
+            buffer.writeCollection(recipe.ingredients, (buf, pair) -> {
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buffer, pair.getFirst());
                 buf.writeInt(pair.getSecond());
             });
-
-            packetByteBuf.writeItem(gunTableRecipe.output);
+            ItemStack.STREAM_CODEC.encode(buffer, recipe.output);
         }
     }
 }

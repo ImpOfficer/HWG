@@ -1,5 +1,6 @@
 package mod.azure.hwg.blocks;
 
+import com.mojang.serialization.MapCodec;
 import mod.azure.hwg.entity.projectiles.FuelTankEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -21,11 +22,16 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 
-@SuppressWarnings("deprecation")
 public class FuelTankBlock extends Block {
+    public static final MapCodec<Block> CODEC = simpleCodec(FuelTankBlock::new);
 
-    public FuelTankBlock() {
-        super(BlockBehaviour.Properties.of().sound(SoundType.METAL).noOcclusion());
+    public FuelTankBlock(BlockBehaviour.Properties properties) {
+        super(properties);
+    }
+
+    @Override
+    protected @NotNull MapCodec<? extends Block> codec() {
+        return CODEC;
     }
 
     private static void primeBlock(Level world, BlockPos pos) {
@@ -41,15 +47,15 @@ public class FuelTankBlock extends Block {
     }
 
     @Override
-    public @NotNull InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        var itemStack = player.getItemInHand(hand);
+    protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        var itemStack = player.getItemInHand(player.getUsedItemHand());
         var item = itemStack.getItem();
         if (item != Items.FLINT_AND_STEEL && item != Items.FIRE_CHARGE)
-            return super.use(state, world, pos, player, hand, hit);
+            return super.useWithoutItem(state, level, pos, player, hitResult);
         else {
-            primeBlock(world, pos);
-            world.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
-            return InteractionResult.sidedSuccess(world.isClientSide);
+            primeBlock(level, pos);
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 11);
+            return InteractionResult.sidedSuccess(level.isClientSide);
         }
     }
 

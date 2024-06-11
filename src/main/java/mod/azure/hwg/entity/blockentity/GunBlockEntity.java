@@ -4,6 +4,7 @@ import mod.azure.hwg.blocks.ImplementedInventory;
 import mod.azure.hwg.client.gui.GunTableScreenHandler;
 import mod.azure.hwg.util.registry.HWGMobs;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -16,6 +17,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
 public class GunBlockEntity extends BlockEntity implements ImplementedInventory, MenuProvider {
 
@@ -26,15 +28,15 @@ public class GunBlockEntity extends BlockEntity implements ImplementedInventory,
     }
 
     @Override
-    public void load(CompoundTag nbt) {
-        super.load(nbt);
-        ContainerHelper.loadAllItems(nbt, items);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        ContainerHelper.loadAllItems(tag, items, registries);
     }
 
     @Override
-    public void saveAdditional(CompoundTag nbt) {
-        super.saveAdditional(nbt);
-        ContainerHelper.saveAllItems(nbt, items);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, items, registries);
     }
 
     @Override
@@ -43,7 +45,7 @@ public class GunBlockEntity extends BlockEntity implements ImplementedInventory,
     }
 
     @Override
-    public Component getDisplayName() {
+    public @NotNull Component getDisplayName() {
         return Component.translatable(getBlockState().getBlock().getDescriptionId());
     }
 

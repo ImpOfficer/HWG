@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
@@ -70,25 +71,20 @@ public class FireballEntity extends AbstractArrow {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) EntityPacket.createPacket(this);
-    }
-
-    @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().define(FORCED_YAW, 0f);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FORCED_YAW, 0f);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+        tag.putShort("life", (short)this.tickCount);
         tag.putFloat("ForcedYaw", entityData.get(FORCED_YAW));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+        this.tickCount = tag.getShort("life");
         entityData.set(FORCED_YAW, tag.getFloat("ForcedYaw"));
     }
 
@@ -99,7 +95,7 @@ public class FireballEntity extends AbstractArrow {
             idleTicks++;
         else
             idleTicks = 0;
-        if (idleOpt <= 0 || idleTicks < idleOpt)
+        if (idleTicks < idleOpt)
             super.tick();
         if (this.tickCount >= 40)
             this.remove(Entity.RemovalReason.DISCARDED);
@@ -171,7 +167,7 @@ public class FireballEntity extends AbstractArrow {
                     EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
                     EnchantmentHelper.doPostDamageEffects(livingEntity1, livingEntity);
                     if (this.isOnFire())
-                        livingEntity.setSecondsOnFire(50);
+                        livingEntity.setRemainingFireTicks(50);
                 }
                 this.doPostHurtEffects(livingEntity);
                 if (livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer serverPlayer && !this.isSilent())
@@ -185,6 +181,11 @@ public class FireballEntity extends AbstractArrow {
     @Environment(EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double distance) {
         return true;
+    }
+
+    @Override
+    protected @NotNull ItemStack getDefaultPickupItem() {
+        return Items.AIR.getDefaultInstance();
     }
 
 }

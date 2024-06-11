@@ -1,17 +1,18 @@
 package mod.azure.hwg.entity;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import mod.azure.azurelib.common.internal.common.core.animation.AnimatableManager;
-import mod.azure.azurelib.common.internal.common.core.animation.Animation;
-import mod.azure.azurelib.common.internal.common.core.animation.AnimationController;
-import mod.azure.azurelib.common.internal.common.core.animation.RawAnimation;
-import mod.azure.azurelib.common.internal.common.core.object.PlayState;
+import mod.azure.azurelib.core.animation.AnimatableManager;
+import mod.azure.azurelib.core.animation.Animation;
+import mod.azure.azurelib.core.animation.AnimationController;
+import mod.azure.azurelib.core.animation.RawAnimation;
+import mod.azure.azurelib.core.object.PlayState;
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.entity.tasks.HWGMeleeAttackTask;
 import mod.azure.hwg.entity.tasks.RangedShootingAttack;
 import mod.azure.hwg.util.registry.HWGItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -46,6 +47,7 @@ import net.tslat.smartbrainlib.api.core.sensor.vanilla.HurtBySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyLivingEntitySensor;
 import net.tslat.smartbrainlib.api.core.sensor.vanilla.NearbyPlayersSensor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -106,9 +108,9 @@ public class TechnodemonGreaterEntity extends HWGEntity implements SmartBrainOwn
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(VARIANT, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(VARIANT, 0);
     }
 
     @Override
@@ -131,17 +133,13 @@ public class TechnodemonGreaterEntity extends HWGEntity implements SmartBrainOwn
         entityData.set(VARIANT, variant);
     }
 
+    @Nullable
     @Override
-    protected float getStandingEyeHeight(Pose pose, EntityDimensions dimensions) {
-        return 3.45F;
-    }
-
-    @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, SpawnGroupData entityData, CompoundTag entityTag) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
         setVariant(random.nextInt(0, 3));
         setUUID(UUID.randomUUID());
         setItemSlot(EquipmentSlot.MAINHAND, makeInitialWeapon());
-        return super.finalizeSpawn(world, difficulty, spawnReason, entityData, entityTag);
+        return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
     }
 
     private ItemStack makeInitialWeapon() {
@@ -163,11 +161,6 @@ public class TechnodemonGreaterEntity extends HWGEntity implements SmartBrainOwn
     @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
         this.playSound(getStepSound(), 0.15F, 1.0F);
-    }
-
-    @Override
-    public @NotNull MobType getMobType() {
-        return MobType.UNDEAD;
     }
 
 }

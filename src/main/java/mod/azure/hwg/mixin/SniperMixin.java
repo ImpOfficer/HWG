@@ -10,6 +10,7 @@ import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.util.registry.HWGItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,10 +26,6 @@ public abstract class SniperMixin {
 
     @Shadow
     private final Minecraft minecraft;
-    @Shadow
-    private int screenWidth;
-    @Shadow
-    private int screenHeight;
     private boolean scoped = true;
 
     protected SniperMixin(Minecraft client) {
@@ -36,17 +33,17 @@ public abstract class SniperMixin {
     }
 
     @Inject(at = @At("TAIL"), method = "render")
-    private void render(CallbackInfo info) {
+    private void render(GuiGraphics guiGraphics, float particalticket, CallbackInfo info) {
         var itemStack = this.minecraft.player.getInventory().getSelected();
         if (this.minecraft.options.getCameraType().isFirstPerson() && itemStack.is(HWGItems.SNIPER)) {
             if (ClientUtils.SCOPE.isDown()) {
                 if (this.scoped) this.scoped = false;
-                this.renderSniperOverlay();
+                this.renderSniperOverlay(guiGraphics);
             } else if (!this.scoped) this.scoped = true;
         }
     }
 
-    private void renderSniperOverlay() {
+    private void renderSniperOverlay(GuiGraphics guiGraphics) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
@@ -56,9 +53,9 @@ public abstract class SniperMixin {
         Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder bufferBuilder = tessellator.getBuilder();
         bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.vertex(0.0D, this.screenHeight, -90.0D).uv(0.0F, 1.0F).endVertex();
-        bufferBuilder.vertex(this.screenWidth, this.screenHeight, -90.0D).uv(1.0F, 1.0F).endVertex();
-        bufferBuilder.vertex(this.screenWidth, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
+        bufferBuilder.vertex(0.0D, guiGraphics.guiHeight(), -90.0D).uv(0.0F, 1.0F).endVertex();
+        bufferBuilder.vertex(guiGraphics.guiWidth(), guiGraphics.guiHeight(), -90.0D).uv(1.0F, 1.0F).endVertex();
+        bufferBuilder.vertex(guiGraphics.guiWidth(), 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
         bufferBuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
         tessellator.end();
         RenderSystem.depthMask(true);

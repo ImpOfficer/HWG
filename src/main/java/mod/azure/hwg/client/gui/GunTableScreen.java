@@ -2,7 +2,7 @@ package mod.azure.hwg.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import mod.azure.hwg.HWGMod;
-import mod.azure.hwg.network.C2SMessageSelectCraft;
+import mod.azure.hwg.network.CraftingPacket;
 import mod.azure.hwg.util.recipes.GunTableRecipe;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -36,7 +36,7 @@ public class GunTableScreen extends AbstractContainerScreen<GunTableScreenHandle
     private void syncRecipeIndex() {
         this.menu.setRecipeIndex(this.selectedIndex);
         this.menu.switchTo(this.selectedIndex);
-        C2SMessageSelectCraft.send(selectedIndex);
+        CraftingPacket.send(this.selectedIndex);
     }
 
     @Override
@@ -221,7 +221,6 @@ public class GunTableScreen extends AbstractContainerScreen<GunTableScreenHandle
             if (this.isHovered && recipes.size() > this.index + indexStartOffset) {
                 ItemStack stack;
                 if (mouseX < this.getX() + 20) {
-                    //stack = recipes.get(this.index + indexStartOffset).value().output;
                     renderTooltip(matrices, mouseX, mouseY);
                 } else if (mouseX < this.getX() + 50 && mouseX > this.getX() + 30) {
                     stack = recipes.get(this.index + indexStartOffset).value().output();
@@ -229,7 +228,6 @@ public class GunTableScreen extends AbstractContainerScreen<GunTableScreenHandle
                         renderTooltip(matrices, mouseX, mouseY);
                     }
                 } else if (mouseX > this.getX() + 65) {
-                    //stack = recipes.get(this.index + indexStartOffset).value().output;
                     renderTooltip(matrices, mouseX, mouseY);
                 }
             }

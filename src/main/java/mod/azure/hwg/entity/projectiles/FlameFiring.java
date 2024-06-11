@@ -26,6 +26,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseFireBlock;
@@ -50,27 +51,6 @@ public class FlameFiring extends AbstractArrow {
         this.shooter = owner;
     }
 
-    protected FlameFiring(EntityType<? extends FlameFiring> type, double x, double y, double z, Level world) {
-        this(type, world);
-    }
-
-    protected FlameFiring(EntityType<? extends FlameFiring> type, LivingEntity owner, Level world) {
-        this(type, owner.getX(), owner.getEyeY() - 0.10000000149011612D, owner.getZ(), world);
-        this.setOwner(owner);
-        if (owner instanceof Player) this.pickup = AbstractArrow.Pickup.ALLOWED;
-    }
-
-    public FlameFiring(Level world, double x, double y, double z) {
-        super(HWGProjectiles.FIRING, x, y, z, world, ItemStack.EMPTY);
-        this.setNoGravity(true);
-        this.setBaseDamage(0);
-    }
-
-    @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) EntityPacket.createPacket(this);
-    }
-
     @Override
     public void tickDespawn() {
         if (this.tickCount >= 40) this.remove(Entity.RemovalReason.DISCARDED);
@@ -86,20 +66,20 @@ public class FlameFiring extends AbstractArrow {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().define(FORCED_YAW, 0f);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FORCED_YAW, 0f);
     }
 
     @Override
     public void addAdditionalSaveData(CompoundTag tag) {
-        super.addAdditionalSaveData(tag);
+        tag.putShort("life", (short)this.tickCount);
         tag.putFloat("ForcedYaw", entityData.get(FORCED_YAW));
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag tag) {
-        super.readAdditionalSaveData(tag);
+        this.tickCount = tag.getShort("life");
         entityData.set(FORCED_YAW, tag.getFloat("ForcedYaw"));
     }
 
@@ -108,7 +88,7 @@ public class FlameFiring extends AbstractArrow {
         var idleOpt = 100;
         if (getDeltaMovement().lengthSqr() < 0.01) idleTicks++;
         else idleTicks = 0;
-        if (idleOpt <= 0 || idleTicks < idleOpt) super.tick();
+        if (idleTicks < idleOpt) super.tick();
         if (this.tickCount >= 40) this.remove(Entity.RemovalReason.DISCARDED);
         var isInsideWaterBlock = level().isWaterAt(blockPosition());
         Helper.spawnLightSource(this, isInsideWaterBlock);
@@ -142,7 +122,7 @@ public class FlameFiring extends AbstractArrow {
     }
 
     @Override
-    protected SoundEvent getDefaultHitGroundSoundEvent() {
+    protected @NotNull SoundEvent getDefaultHitGroundSoundEvent() {
         return SoundEvents.FIRE_AMBIENT;
     }
 
@@ -179,6 +159,11 @@ public class FlameFiring extends AbstractArrow {
         var y = -Mth.sin((pitch + roll) * f);
         var z = Mth.cos(yaw * f) * Mth.cos(pitch * f);
         this.shoot(x, y, z, modifierZ, 0);
+    }
+
+    @Override
+    protected @NotNull ItemStack getDefaultPickupItem() {
+        return Items.AIR.getDefaultInstance();
     }
 
 }

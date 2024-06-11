@@ -24,12 +24,11 @@ public record RenderRegistry() {
         EntityRendererRegistry.register(HWGProjectiles.FIRING, EmptyRender::new);
         EntityRendererRegistry.register(HWGProjectiles.ROCKETS, RocketRender::new);
         EntityRendererRegistry.register(HWGProjectiles.SILVERBULLETS, EmptyRender::new);
-        EntityRendererRegistry.register(HWGMobs.TECHNOLESSER, ctx -> new HWGMobRender(ctx, EntityEnum.DEMON));
-        EntityRendererRegistry.register(HWGMobs.TECHNOGREATER, ctx -> new HWGMobRender(ctx, EntityEnum.DEMON));
-        EntityRendererRegistry.register(HWGMobs.MERC, ctx -> new HWGMobRender(ctx, EntityEnum.ILLEAGER));
-        EntityRendererRegistry.register(HWGMobs.SPY, ctx -> new HWGMobRender(ctx, EntityEnum.ILLEAGER));
+        EntityRendererRegistry.register(HWGMobs.TECHNOLESSER, ctx -> new HWGMobRender<>(ctx, EntityEnum.DEMON));
+        EntityRendererRegistry.register(HWGMobs.TECHNOGREATER, ctx -> new HWGMobRender<>(ctx, EntityEnum.DEMON));
+        EntityRendererRegistry.register(HWGMobs.MERC, ctx -> new HWGMobRender<>(ctx, EntityEnum.ILLEAGER));
+        EntityRendererRegistry.register(HWGMobs.SPY, ctx -> new HWGMobRender<>(ctx, EntityEnum.ILLEAGER));
         EntityRendererRegistry.register(HWGMobs.FUELTANK, FuelTankRender::new);
-
     }
 
 }

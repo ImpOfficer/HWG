@@ -2,8 +2,8 @@ package mod.azure.hwg.entity;
 
 import mod.azure.azurelib.common.api.common.animatable.GeoEntity;
 import mod.azure.azurelib.common.api.common.animatable.GeoItem;
-import mod.azure.azurelib.common.internal.common.core.animatable.instance.AnimatableInstanceCache;
 import mod.azure.azurelib.common.internal.common.util.AzureLibUtil;
+import mod.azure.azurelib.core.animatable.instance.AnimatableInstanceCache;
 import mod.azure.hwg.entity.projectiles.*;
 import mod.azure.hwg.item.enums.GunTypeEnum;
 import mod.azure.hwg.item.weapons.AzureAnimatedGunItem;
@@ -80,10 +80,10 @@ public abstract class HWGEntity extends Monster implements GeoEntity, NeutralMob
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        entityData.define(ANGER_TIME, 0);
-        entityData.define(STATE, 0);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(ANGER_TIME, 0);
+        builder.define(STATE, 0);
     }
 
     @Override
@@ -175,7 +175,7 @@ public abstract class HWGEntity extends Monster implements GeoEntity, NeutralMob
                 return SoundEvents.FIRECHARGE_USE;
             }
             case BALROG -> {
-                return SoundEvents.GENERIC_EXPLODE;
+                return SoundEvents.GENERIC_EXPLODE.value();
             }
             case SNIPER -> {
                 return HWGSounds.SNIPER;

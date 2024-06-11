@@ -8,6 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 public class GrenadeStunItem extends Item {
 
@@ -16,7 +17,7 @@ public class GrenadeStunItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
         ItemStack itemStack = user.getItemInHand(hand);
         if (!user.getCooldowns().isOnCooldown(this)) {
             user.getCooldowns().addCooldown(this, HWGMod.config.gunconfigs.grenades_throw_cooldown);

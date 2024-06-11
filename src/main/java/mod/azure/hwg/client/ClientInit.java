@@ -1,8 +1,8 @@
 package mod.azure.hwg.client;
 
-import mod.azure.azurelib.common.platform.Services;
 import mod.azure.hwg.HWGMod;
 import mod.azure.hwg.client.gui.GunTableScreen;
+import mod.azure.hwg.network.PacketHandler;
 import mod.azure.hwg.particle.BrimParticle;
 import mod.azure.hwg.particle.FlareParticle;
 import mod.azure.hwg.particle.WFlareParticle;
@@ -17,6 +17,7 @@ public class ClientInit implements ClientModInitializer {
     public void onInitializeClient() {
         ModelProviderinit.init();
         RenderRegistry.init();
+        new PacketHandler().registerMessages();
         MenuScreens.register(HWGMod.SCREEN_HANDLER_TYPE, GunTableScreen::new);
         ParticleFactoryRegistry.getInstance().register(HWGParticles.BLACK_FLARE, FlareParticle.BlackSmokeFactory::new);
         ParticleFactoryRegistry.getInstance().register(HWGParticles.BLUE_FLARE, FlareParticle.BlueSmokeFactory::new);

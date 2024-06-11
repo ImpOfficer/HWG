@@ -22,11 +22,14 @@ import net.minecraft.world.entity.npc.VillagerTrades;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.trading.ItemCost;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.saveddata.maps.MapDecorationTypes;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public record GunSmithProfession() {
@@ -81,7 +84,7 @@ public record GunSmithProfession() {
 
         @Nullable
         public MerchantOffer getOffer(Entity entity, RandomSource random) {
-            return new MerchantOffer(new ItemStack(Items.EMERALD, this.price), new ItemStack(this.secondBuy.getItem(), this.secondCount), new ItemStack(this.sell.getItem(), this.sellCount), this.maxUses, this.experience, this.multiplier);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, this.price), Optional.of(new ItemCost(this.secondBuy.getItem())), new ItemStack(this.sell.getItem(), this.sellCount), this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -102,7 +105,7 @@ public record GunSmithProfession() {
 
         public MerchantOffer getOffer(Entity entity, RandomSource random) {
             ItemStack itemStack = new ItemStack(this.buy, this.price);
-            return new MerchantOffer(itemStack, new ItemStack(Items.EMERALD), this.maxUses, this.experience, this.multiplier);
+            return new MerchantOffer(new ItemCost(itemStack.getItem()), new ItemStack(Items.EMERALD), this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -125,7 +128,7 @@ public record GunSmithProfession() {
 
         public MerchantOffer getOffer(Entity entity, RandomSource random) {
             ItemStack itemStack = new ItemStack(this.buy, this.price);
-            return new MerchantOffer(itemStack, new ItemStack(sell.asItem()), this.maxUses, this.experience, this.multiplier);
+            return new MerchantOffer(new ItemCost(itemStack.getItem()), new ItemStack(sell.asItem()), this.maxUses, this.experience, this.multiplier);
         }
     }
 
@@ -163,7 +166,7 @@ public record GunSmithProfession() {
         }
 
         public MerchantOffer getOffer(Entity entity, RandomSource random) {
-            return new MerchantOffer(new ItemStack(Items.EMERALD, this.price), new ItemStack(this.sell.getItem(), this.count), this.maxUses, this.experience, this.multiplier);
+            return new MerchantOffer(new ItemCost(Items.EMERALD, this.price), new ItemStack(this.sell.getItem(), this.count), this.maxUses, this.experience, this.multiplier);
         }
     }
 

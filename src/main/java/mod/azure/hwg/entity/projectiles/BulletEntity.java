@@ -25,6 +25,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -62,11 +63,6 @@ public class BulletEntity extends AbstractArrow {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return (Packet<ClientGamePacketListener>) EntityPacket.createPacket(this);
-    }
-
-    @Override
     protected void doPostHurtEffects(LivingEntity living) {
         super.doPostHurtEffects(living);
         if (HWGMod.config.gunconfigs.bullets_disable_iframes_on_players || !(living instanceof Player)) {
@@ -81,9 +77,9 @@ public class BulletEntity extends AbstractArrow {
     }
 
     @Override
-    protected void defineSynchedData() {
-        super.defineSynchedData();
-        this.getEntityData().define(FORCED_YAW, 0f);
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(FORCED_YAW, 0f);
     }
 
     @Override
@@ -123,7 +119,7 @@ public class BulletEntity extends AbstractArrow {
 
     @Override
     protected @NotNull SoundEvent getDefaultHitGroundSoundEvent() {
-        return SoundEvents.ARMOR_EQUIP_IRON;
+        return SoundEvents.ARMOR_EQUIP_IRON.value();
     }
 
     @Override
@@ -136,7 +132,7 @@ public class BulletEntity extends AbstractArrow {
             level().getBlockState(blockHitResult.getBlockPos()).setValue(TntBlock.UNSTABLE, true);
         if (level().getBlockState(blockHitResult.getBlockPos()).getBlock().defaultBlockState().is(Blocks.GLASS_PANE) || level().getBlockState(blockHitResult.getBlockPos()).getBlock() instanceof StainedGlassPaneBlock)
             level().destroyBlock(blockHitResult.getBlockPos(), true);
-        this.setSoundEvent(SoundEvents.ARMOR_EQUIP_IRON);
+        this.setSoundEvent(SoundEvents.ARMOR_EQUIP_IRON.value());
     }
 
     @Override
@@ -156,7 +152,7 @@ public class BulletEntity extends AbstractArrow {
                 if (!this.level().isClientSide && entity2 instanceof LivingEntity livingEntity1) {
                     EnchantmentHelper.doPostHurtEffects(livingEntity, entity2);
                     EnchantmentHelper.doPostDamageEffects(livingEntity1, livingEntity);
-                    if (this.isOnFire()) livingEntity.setSecondsOnFire(50);
+                    if (this.isOnFire()) livingEntity.setRemainingFireTicks(50);
                 }
                 this.doPostHurtEffects(livingEntity);
                 if (livingEntity != entity2 && livingEntity instanceof Player && entity2 instanceof ServerPlayer serverPlayer && !this.isSilent())
@@ -169,6 +165,11 @@ public class BulletEntity extends AbstractArrow {
     @Environment(EnvType.CLIENT)
     public boolean shouldRenderAtSqrDistance(double distance) {
         return true;
+    }
+
+    @Override
+    protected @NotNull ItemStack getDefaultPickupItem() {
+        return Items.AIR.getDefaultInstance();
     }
 
 }

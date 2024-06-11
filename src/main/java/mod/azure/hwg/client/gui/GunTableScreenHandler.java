@@ -15,6 +15,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -87,10 +88,10 @@ public class GunTableScreenHandler extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) {
+    public @NotNull ItemStack quickMoveStack(Player player, int index) {
         var itemStack = ItemStack.EMPTY;
         var slot = this.slots.get(index);
-        if (slot != null && slot.hasItem()) {
+        if (slot.hasItem()) {
             var itemStack2 = slot.getItem();
             itemStack = itemStack2.copy();
             if (index == 2) {
@@ -98,11 +99,8 @@ public class GunTableScreenHandler extends AbstractContainerMenu {
                     return ItemStack.EMPTY;
                 slot.onQuickCraft(itemStack2, itemStack);
             } else if (index != 0 && index != 1) {
-                if (index >= 3 && index < 30)
-                    if (!this.moveItemStackTo(itemStack2, 30, 39, false))
-                        return ItemStack.EMPTY;
-                    else if (index >= 30 && index < 39 && !this.moveItemStackTo(itemStack2, 3, 30, false))
-                        return ItemStack.EMPTY;
+                if (index >= 3 && index < 30 && !this.moveItemStackTo(itemStack2, 30, 39, false))
+                    return ItemStack.EMPTY;
             } else if (!this.moveItemStackTo(itemStack2, 3, 39, false))
                 return ItemStack.EMPTY;
 
@@ -180,7 +178,7 @@ public class GunTableScreenHandler extends AbstractContainerMenu {
     }
 
     private boolean equals(ItemStack itemStack, ItemStack otherItemStack) {
-        return itemStack.getItem() == otherItemStack.getItem() && ItemStack.isSameItemSameTags(itemStack, otherItemStack);
+        return itemStack.getItem() == otherItemStack.getItem() && ItemStack.isSameItemSameComponents(itemStack, otherItemStack);
     }
 
     @Override
